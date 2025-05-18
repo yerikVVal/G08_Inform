@@ -1,6 +1,6 @@
 ---
 title: "G08_Informe"
-author: 
+author: "Yerik"
 - "Jorge Alejandro Romero Cabrera"
 - "Lilian Rocío Mercado Asto"
 - "Gabriel David Ojeda Nieto"
