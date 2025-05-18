@@ -29,9 +29,7 @@ Identificar los factores que influyen en la conexión a internet en los diferent
 
 1- Analizar estadísticamente la variabilidad de la velocidad y estabilidad de la conexión a internet según el tipo de ambiente (laboratorio, aula, espacios comunes) en la UTEC durante el periodo 2025-1.
 
-2- Determinar la percepción y nivel de satisfacción de los estudiantes respecto a la conexión a internet en distintos ambientes de la UTEC durante el periodo 2025-1, relacionando estos datos con las mediciones técnicas de velocidad de descarga, velocidad de carga y estabilidad de la conexión.
-
-3- Identificar las condiciones temporales y espaciales óptimas (día, turno, espacio y piso) en las que se alcanza el mejor rendimiento de conexión a internet dentro del campus UTEC, durante el periodo académico 2025-1.
+2- Identificar las condiciones temporales y espaciales óptimas (día, turno, espacio y piso) en las que se alcanza el mejor rendimiento de conexión a internet dentro del campus UTEC, durante el periodo académico 2025-1.
 
 # II. Datos
 
