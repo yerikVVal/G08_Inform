@@ -1,0 +1,507 @@
+---
+title: "G08_Informe"
+author: 
+- "Jorge Alejandro Romero Cabrera"
+- "Lilian Rocío Mercado Asto"
+- "Gabriel David Ojeda Nieto"
+- "Yerik Hernan Vilchez Valentin"
+- "Lyam Santiago Zuñiga Balarezo"
+format: html
+editor: visual
+embed-resources: true
+---
+
+# I. Introducción
+
+## I.1 Relevancia
+
+En la actualidad, el acceso a una conexión a internet estable y eficiente es un componente esencial para el desarrollo académico en instituciones educativas. En el contexto universitario, la calidad del servicio de internet puede influir significativamente en la realización de actividades académicas, el acceso a recursos digitales y la comunicación entre estudiantes y docentes. Por ello, el presente proyecto tiene como objetivo analizar la variabilidad y calidad de la conexión a internet en distintos ambientes de la Universidad de Ingeniería y Tecnología (UTEC) durante el periodo académico 2025-1. Este análisis permitirá identificar áreas de mejora en la infraestructura tecnológica, optimizar los recursos de conectividad y contribuir al bienestar académico de la comunidad universitaria.
+
+## I.2 Planificación
+
+## I.3 Objetivos
+
+### I.3.1 Objetivo general
+
+Identificar los factores que influyen en la conexión a internet en los diferentes ambientes de la UTEC en el periodo académico 2025-1.
+
+### I.3.2 Objetivos específicos
+
+1- Analizar estadísticamente la variabilidad de la velocidad y estabilidad de la conexión a internet según el tipo de ambiente (laboratorio, aula, espacios comunes) en la UTEC durante el periodo 2025-1.
+
+2- Determinar la percepción y nivel de satisfacción de los estudiantes respecto a la conexión a internet en distintos ambientes de la UTEC durante el periodo 2025-1, relacionando estos datos con las mediciones técnicas de velocidad de descarga, velocidad de carga y estabilidad de la conexión.
+
+3- Identificar las condiciones temporales y espaciales óptimas (día, turno, espacio y piso) en las que se alcanza el mejor rendimiento de conexión a internet dentro del campus UTEC, durante el periodo académico 2025-1.
+
+# II. Datos
+
+## II.1 Población objetivo
+
+La población objetivo está compuesta por todos los usuarios que acceden a la red de internet en los diferentes ambientes de la UTEC durante el periodo académico 2025-1. Esto incluye:
+
+-   Estudiantes de todos los niveles (pregrado y posgrado).
+
+-   Docentes y personal administrativo.
+
+-   Visitantes (en caso de que se permita su acceso a la red).
+
+## II.2 Tipo de muestreo
+
+El tipo de muestreo utilizado es un **Muestreo Estratificado por conglomerados (Cluster Sampling)**.
+
+-   **Por qué es estratificado:** Se recolectaron datos de distintos ambientes (`Tipo de Área`), pisos (`Piso`), turnos (`Turno`) y torres (`Torre`). Cada una de estas variables representa un estrato del cual se toma una muestra.
+
+-   **Por qué es por conglomerados:** En lugar de tomar muestras individuales, cada integrante realizó mediciones en múltiples puntos del mismo conglomerado (`Área`, `Espacio`). Esto facilita la recolección de datos y permite evaluar la variabilidad interna del conglomerado.
+
+## II.3 Recolección de datos
+
+-   **Instrumento:** Utilizamos un formulario diseñado para recolectar múltiples variables sobre la conexión a internet en la UTEC, incluyendo velocidad de descarga, velocidad de subida, latencia, temperatura y tipo de dispositivo.
+
+-   **Herramientas utilizadas:** Aplicaciones para medición de velocidad de internet y latencia (`nperf`). Formulario en línea para registrar las observaciones (`Google Forms`).
+
+-   **Periodo de recolección:** Se recolectaron datos durante distintos días y turnos (mañana, tarde, noche) del periodo académico 2025-1.
+
+## II.4 Variables
+
+```{r}
+tabla <- data.frame(
+  Variable = c("grupo", "dia", "turno", "torre", "piso", "espacio", "zona", 
+               "dispositivo", "conexion", "red", "latencia", "upload", "download"),
+  Tipo = c("categorica", "categorica", "categorica", "categorica", "categorica",
+           "categorica", "categorica", "categorica", "categorica", "categorica",
+           "numerica", "numerica", "numerica"),
+  Nivel = c("nominal (discreta)", "ordinal (discreta)", "ordinal (discreta)", "nominal (discreta)", "ordinal (discreta)",
+            "nominal (discreta)", "nominal (discreta)", "nominal (discreta)", "nominal (discreta)", "nominal (discreta)",
+            "continua", "continua", "continua")
+)
+print(tabla)
+```
+
+Este bloque de código crea una tabla que organiza las variables usadas en el estudio, indicando para cada una su tipo y nivel de medición. La tabla se genera con la función `data.frame` y se visualiza con `print()`.
+
+Las variables categóricas incluyen datos como `grupo`, `día`, `turno`, `torre`, `piso`, `espacio`, `zona`, `dispositivo`, `conexión` y `red`. Estas se dividen en dos niveles: nominal (sin orden específico) como grupo, torre o red; y ordinal (con un orden lógico) como día, turno y piso.
+
+Las variables numéricas continuas son `latencia`, `upload` (velocidad de carga) y `download` (velocidad de descarga). Estas son fundamentales para evaluar la calidad técnica de la conexión a internet.
+
+Esta clasificación es clave para definir qué tipo de análisis estadístico aplicar más adelante. Por ejemplo, para el Objetivo 1 se comparan ambientes (variables categóricas como tipo de espacio) con mediciones técnicas (variables numéricas como latencia). Para el Objetivo 2 se relaciona la percepción de los usuarios con los datos técnicos. Y para el Objetivo 3, se analizan condiciones temporales y espaciales (como día o piso) con el rendimiento de la red.
+
+## II.5 Limpieza
+
+### II.5.1 Librerías y leer el data frame
+
+```{r}
+library(readr)
+library(dplyr)
+library(stringr)
+library(janitor)
+library(ggplot2)
+DataFrame <- read.csv("Respuestas_forms.csv")
+View(DataFrame)
+```
+
+```{r}
+DataFrame <- clean_names(DataFrame)
+colnames(DataFrame)
+```
+
+En este bloque se iniciamos la limpieza de los datos. Primero, se cargan varias librerías necesarias para el análisis: `readr` para leer archivos CSV, `dplyr` para manipulación de datos, `stringr` para trabajar con texto, `janitor` para limpiar nombres de columnas, y `ggplot2` para crear gráficos.
+
+Luego, importamos el archivo `"Respuestas_forms.csv"`, que contiene las respuestas del formulario realizado, y se almacena en un dataframe llamado `"DataFrame"`.
+
+Después aplicamos la función `clean_names` del paquete janitor, que sirve para estandarizar los nombres de las columnas eliminando tildes, espacios, mayúsculas y otros caracteres problemáticos en general. Finalmente, con colnames se muestran los nombres de las columnas ya limpios.
+
+### II.5.2 Variables a estudiar
+
+```{r}
+DF <- DataFrame %>%
+  select(
+    grupo_indica_a_que_grupo_perteneces,
+    dia,
+    turno,
+    torre_torre_principal_o_torre_de_6_pisos,
+    piso,
+    espacio,
+    tipo_de_area,
+    dispositivo,
+    tipo_de_conexion,
+    red,
+    latencia_ping_ms,
+    velocidad_de_subida_mbps,
+    velocidad_de_bajada_mbps
+  )
+```
+
+En esta parte del código, nuestro equipo seleccionó únicamente las variables relevantes para el análisis a partir del dataframe original. Utilizamos la función `select` del paquete `dplyr` para filtrar las columnas necesarias que nos permiten cumplir con los objetivos de la investigación.
+
+Las variables seleccionadas incluyen datos contextuales como `grupo`, `día`, `turno`, `torre`, `piso`, `espacio` y `tipo de área`. También se incluyen variables sobre el `dispositivo` utilizado, `tipo de conexión` y `red`. Finalmente, se incorporan las variables técnicas que miden el rendimiento de internet: `latencia`, `velocidad de subida` y `velocidad de bajada`.
+
+Con esto reducimos la base de datos a solo las columnas necesarias, eliminando cualquier información redundante que no sería utilizada en el análisis. Esto mejora la eficiencia del trabajo posterior y permite centrarnos únicamente en las variables que tienen relación directa con los objetivos planteados en el estudio.
+
+### II.5.3 Cambio de nombres de las variables para facilitar el codigo
+
+```{r}
+colnames(DF)[1]<- "grupo"
+colnames(DF)[4] <- "torre"
+colnames(DF)[11] <- "latencia"
+colnames(DF)[12]<- "upload"
+colnames(DF)[13]<- "download"
+colnames(DF)[7]<- "ambito"
+colnames(DF)[9]<- "conexion"
+colnames(DF)
+```
+
+En este bloque, nuestro equipo realizó un cambio de nombres a varias columnas del dataframe con el objetivo de facilitar la lectura y el uso del código en las siguientes etapas del análisis. Usamos asignaciones directas a través de la función `colnames`, especificando el número de columna que queríamos renombrar y el nuevo nombre correspondiente.
+
+### II.5.4 Clasificación de variables
+
+```{r}
+DF$grupo       <- factor(DF$grupo)
+DF$dia         <- factor(DF$dia, levels = c("Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"),ordered = TRUE)
+DF$turno       <- factor(DF$turno, levels = c("Mañana Temprano (6:00 a.m. a 9:00 a.m.)",
+                                              "Mañana Pico (9:00 a.m. a 12:00 p.m)", 
+                                              "Tarde temprano (12:00 p.m. a 3:00 p.m)",
+                                              "Tarde pico (3:00 p.m. a 6:00 p.m)",
+                                              "Noche (6:00 p.m. a 9:00 p.m)",
+                                              "Noche tarde (9:00 p.m. a 11:00 p.m)"
+                                              ), ordered = TRUE)
+DF$torre       <- factor(DF$torre)
+DF$piso        <- factor(DF$piso, ordered = TRUE)
+DF$espacio     <- factor(DF$espacio)
+DF$ambito      <- factor(DF$ambito)
+DF$dispositivo <- factor(DF$dispositivo)
+DF$conexion    <- factor(DF$conexion)
+DF$red         <- factor(DF$red)
+
+# Las siguientes ya están como numéricas (continua), pero aseguramos por si acaso
+DF$latencia    <- as.numeric(DF$latencia)
+DF$upload      <- as.numeric(DF$upload)
+DF$download    <- as.numeric(DF$download)
+```
+
+En este caso, nuestro grupo se encargó de clasificar correctamente las variables según su naturaleza, lo cual consideramos esencial para poder aplicar los análisis estadísticos adecuados más adelante.
+
+Primero, convertimos varias variables categóricas en factores. Esto incluye variables como `grupo`, `torre`, `espacio`, `ámbito`, `dispositivo`, `conexión` y `red.` Además, establecimos un orden lógico en las variables que lo requerían. Por ejemplo, la variable "`día`" fue ordenada de lunes a sábado, y la variable "`turno`" se organizó de acuerdo con la secuencia horaria del día, desde la mañana temprano hasta la noche tarde. También se ordenó la variable `piso`, lo cual es importante para analizar patrones relacionados con la ubicación vertical dentro de los edificios.
+
+Luego, para asegurarnos de que las variables técnicas fueran reconocidas como numéricas continuas, aplicamos la conversión explícita con `as.numeric` a las variables `latencia`, `upload` y `download`, aunque ya estaban en formato numérico. Esta doble verificación nos permitió prevenir errores inesperados en los gráficos o en los análisis estadísticos posteriores.
+
+### II.5.5 Acortar nombres
+
+```{r}
+DF$turno <- recode(DF$turno,
+                   "Mañana Temprano (6:00 a.m. a 9:00 a.m.)" = "6:00–9:00",
+                   "Mañana Pico (9:00 a.m. a 12:00 p.m)" = "9:00–12:00",
+                   "Tarde temprano (12:00 p.m. a 3:00 p.m)" = "12:00–15:00",
+                   "Tarde pico (3:00 p.m. a 6:00 p.m)" = "15:00–18:00",
+                   "Noche (6:00 p.m. a 9:00 p.m)" = "18:00–21:00",
+                   "Noche tarde (9:00 p.m. a 11:00 p.m)" = "21:00–23:00")
+
+DF$espacio <- recode(DF$espacio,
+                     "Aula Teórica (A)" = "Aula A",
+                     "Laboratorio (M)" = "Lab M",
+                     "Laboratorio (L)" = "Lab L",
+                     "Sala de Estudio" = "Sala Estudio",
+                     "Comedor y cafeterias" = "Comedor/Café",
+                     "Patios y áreas de descanso" = "Patio/Descanso",
+                     "Oficinas de atención al público/estudiantes" = "Of. Atención",
+                     "Seguridad y vigilancia" = "Seguridad",
+                     "Oficinas de administración, directores de carrera y profesores" = "Of. Admin",
+                     "Zona de Estacionamiento" = "Estacionamiento",
+                     "Servicio Medico" = "Serv. Médico")
+
+DF$ambito <- recode(DF$ambito,
+                  "Área Académicas" = "Académicas",
+                  "Área Administrativas" = "Administrativas",
+                  "Área de servicio y apoyo" = "Serv. Apoyo")
+```
+
+En esta sección recodificamos los valores de algunas variables para hacerlos más breves y manejables visualmente en los gráficos y análisis posteriores. En la variable `turno`, acortamos los rangos horarios a un formato más compacto. En la variable `espacio`, simplificamos los nombres de los ambientes para que sean más fáciles de leer y comparar. También hicimos lo mismo con los nombres del `ámbito`, agrupándolos de forma más directa. Esta limpieza mejora la claridad en tablas y visualizaciones sin perder el significado original de los datos.
+
+### II.5.6 Celdas vacias a NA
+
+```{r}
+DF[DF == ""] <- NA 
+apply(is.na(DF),2,sum)
+```
+
+Lo que estamos haciendo es reemplazar las celdas vacías que tenemos en nuestro conjunto de datos con un valor que R pueda identificar como "faltante", que es el valor `NA`. Esto es importante porque, si no lo hacemos, R no va a tratar correctamente esas celdas vacías cuando hagamos análisis más adelante.
+
+Una vez que hemos hecho eso, queremos saber cuántos valores faltantes hay en cada columna de nuestros datos. Para hacer esto, contamos cuántas veces aparece un valor `NA` en cada columna.
+
+### II.5.7 Eliminar filas con NA
+
+```{r}
+# Se eliminan todas las filas que contienen al menos un valor nulo (NA),
+# dado que estas representan menos del 1% de la muestra original.
+
+DF <- DF %>% 
+  filter(complete.cases(.))
+```
+
+Lo que estamos haciendo aquí es eliminar las filas que tienen valores faltantes, es decir, aquellas filas donde hay al menos un `NA`.
+
+Usamos la función `filter(complete.cases(.))` que se encarga de filtrar y quedarse solo con las filas que tienen todos sus valores completos, es decir, sin ningún valor `NA`. `complete.cases()` devuelve un valor lógico, donde cada fila que no tiene ningún `NA` es marcada como `TRUE` y las filas con algún `NA` se marcan como `FALSE`. Al usar `filter()`, solo mantenemos las filas que están completas, y las filas con `NA` son eliminadas del dataframe.
+
+### II.5.8 Tamaño efectivo de cada variable
+
+```{r}
+colSums(!is.na(DF))
+```
+
+Aquí calculamos el tamaño efectivo de cada variable en nuestro conjunto de datos, es decir, el número de valores no faltantes (`NA`) que tiene cada columna.
+
+Usamos `colSums(!is.na(DF))`. Primero, `is.na(DF)` nos devuelve un DataFrame con valores lógicos (`TRUE` o `FALSE`), donde cada `TRUE` indica que el valor es `NA`. Luego, usamos `!is.na(DF)` para invertir esos valores lógicos, así que ahora tenemos `TRUE` donde no hay `NA` y `FALSE` donde sí hay un `NA`. Después, `colSums()` suma todos esos valores `TRUE` (que equivalen a 1) por cada columna, lo que nos da el número de valores no faltantes en cada variable.
+
+### II.5.9 Casos completos
+
+```{r}
+sum(complete.cases(DF))
+```
+
+En este caso, estamos contando cuántas filas completas hay en el dataframe, es decir, cuántas filas no tienen ningún valor faltante (sin `NA`).
+
+La función `complete.cases(DF)` nos devuelve un vector lógico donde cada elemento es `TRUE` si la fila correspondiente no tiene ningún `NA` y `FALSE` si tiene al menos uno. Luego, con `sum()`, contamos cuántos valores `TRUE` hay en ese vector, lo que nos da el número total de filas completas en el dataframe.
+
+# III. Análisis descriptivo
+
+## Eliminación de atípicos
+
+```{r}
+outliers <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lim_inf <- q1 - 1.5 * iqr
+  lim_sup <- q3 + 1.5 * iqr
+  x[x >= lim_inf & x <= lim_sup]
+}
+
+DF_limpio <- DF %>%
+  filter(
+    upload >= quantile(upload, 0.25, na.rm = TRUE) - 1.5 * IQR(upload, na.rm = TRUE) &
+    upload <= quantile(upload, 0.75, na.rm = TRUE) + 1.5 * IQR(upload, na.rm = TRUE),
+    
+    download >= quantile(download, 0.25, na.rm = TRUE) - 1.5 * IQR(download, na.rm = TRUE) &
+    download <= quantile(download, 0.75, na.rm = TRUE) + 1.5 * IQR(download, na.rm = TRUE),
+    
+    latencia >= quantile(latencia, 0.25, na.rm = TRUE) - 1.5 * IQR(latencia, na.rm = TRUE) &
+    latencia <= quantile(latencia, 0.75, na.rm = TRUE) + 1.5 * IQR(latencia, na.rm = TRUE)
+  )
+```
+
+En este bloque hemos eliminado los valores atípicos en las variables del dataframe, para asegurarnos de que nuestros análisis no se vean distorsionados por datos extremos que no son representativos.
+
+La función `outliers()` calcula los límites de los valores atípicos usando el rango intercuartílico (`IQR`). Primero, calculamos el primer cuartil (`q1`) y el tercer cuartil (`q3`) de la variable, luego calculamos el `IQR`, que es la diferencia entre esos dos cuartiles. Después, usamos estos valores para establecer los límites inferior y superior: cualquier dato fuera de esos límites se considera un atípico.
+
+Luego, al aplicar esto a las columnas `upload`, `download` y `latencia`, eliminamos los valores que caen fuera de esos límites para cada una de estas variables. Utilizamos la función `filter()` de `dplyr` para mantener solo las filas donde los valores de estas tres variables estén dentro de los rangos establecidos.
+
+## III.1 Análisis univariado
+
+### III.1.1 Descriptores
+
+```{r}
+cat_vars <- names(Filter(is.factor, DF))
+num_vars <- names(Filter(is.numeric, DF_limpio))
+
+#Descriptores para variables categóricas
+for (var in cat_vars) {
+  cat("\n-- Variable:", var, "--\n")
+  print(table(DF[[var]], useNA = "ifany"))
+  print(round(prop.table(table(DF[[var]], useNA = "ifany")) * 100, 2))
+}
+
+#Descriptores para variables numéricas
+for (var in num_vars) {
+  cat("\n-- Variable:", var, "--\n")
+  x <- DF_limpio[[var]]
+  resumen <- data.frame(
+    Min = min(x, na.rm = TRUE),
+    Q1 = round(quantile(x, 0.25, na.rm = TRUE),2),
+    Mediana = round(median(x, na.rm = TRUE),2),
+    Promedio = round(mean(x, na.rm = TRUE),2),
+    Q3 = round(quantile(x, 0.75, na.rm = TRUE),2),
+    Max = max(x, na.rm = TRUE),
+    Des_Estandar = round(sd(x, na.rm = TRUE),2),
+    Coef_Variacion = round(sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE) * 100, 2)
+  )
+  print(resumen)
+}
+```
+
+Este fragmento de código hace un análisis univariado para obtener descriptores estadísticos tanto para las variables categóricas como numéricas del dataframe `DF_limpio` (que ya está limpio de valores atípicos).
+
+Primero, el código identifica las variables categóricas y numéricas en el conjunto de datos. Para las variables categóricas, el código muestra una tabla con la cantidad de veces que aparece cada categoría, incluyendo los valores faltantes (`NA`). También calcula el porcentaje de cada categoría en la variable, lo que nos ayuda a ver la distribución de las categorías y cuántas veces se repite cada una.
+
+Para las variables numéricas, el código calcula varios descriptores importantes. Primero, obtiene el valor mínimo y máximo de la variable, lo que nos da una idea del rango de los datos. Luego, calcula el primer cuartil (`Q1`), la mediana (`median`), el promedio (`mean`), y el tercer cuartil (`Q3`), lo cual nos ayuda a entender cómo están distribuidos los datos. También calcula la desviación estándar (`sd`) para ver la dispersión de los datos y el coeficiente de variación (`cv`), que es útil para comparar la variabilidad entre diferentes variables, ya que nos da una medida relativa de dispersión.
+
+### III.1.2 Gráficos
+
+#### III.1.2.1 Gráficos de barras
+
+```{r}
+par(mar = c(10, 6, 4, 4))
+for (var in cat_vars) {
+  orientacion <- if (var %in% c("dia", 
+                                "torre", 
+                                "piso",
+                                "dispositivo",
+                                "conexion",
+                                "red")) 1 else 2  
+  
+  barplot(table(DF[[var]]), 
+          main = paste("Frecuencia de", var), 
+          col = "skyblue", 
+          las = orientacion)
+}
+```
+
+Aquí generamos gráficos de barras para las variables categóricas en el dataframe `DF`, para poder ver cómo se distribuyen las categorías en cada variable.
+
+Primero, ajustamos los márgenes del gráfico con `par(mar = c(10, 6, 4, 4))`, lo que nos permite tener más espacio en los ejes, especialmente en el eje de las categorías, para que las etiquetas no se corten y se vean bien.
+
+Luego, recorremos todas las variables categóricas del dataframe. Para cada variable, definimos la orientación de las etiquetas de las barras. Si la variable está en una lista específica (como "`dia`", "`torre`", "`piso`", etc.), las etiquetas se ponen verticales (orientación 1); si no, las dejamos horizontales (orientación 2). Esto lo hacemos para que las etiquetas largas no se solapen y sean más fáciles de leer.
+
+Después, con `barplot()`, generamos el gráfico de barras. La función `table(DF[[var]])` nos da las frecuencias de cada categoría en la variable, y con el título `main = paste("Frecuencia de", var)`, indicamos de qué variable estamos hablando. Las barras son de color azul claro (`col = "skyblue"`), y la orientación de las etiquetas depende de la configuración que definimos antes.
+
+#### III.1.2.2 Histogramas y boxplots
+
+```{r}
+for (var in num_vars) {
+  hist(DF_limpio[[var]], 
+       main = paste("Histograma de", var), 
+       xlab = var, 
+       col = "lightgreen", 
+       breaks = 10)
+  
+  boxplot(DF_limpio[[var]], 
+          main = paste("Boxplot de", var), 
+          col = "orange", 
+          horizontal = FALSE)
+}
+```
+
+En este caso de aquí generamos dos tipos de gráficos para las variables numéricas: histogramas y boxplots, con el objetivo de entender mejor cómo se distribuyen los datos y si hay valores atípicos.
+
+Para cada variable numérica, primero generamos un histograma. Este gráfico nos muestra cómo se distribuyen los datos en intervalos. Al usar `hist()`, obtenemos un gráfico donde el eje X representa los valores de la variable, y las barras indican cuántos datos caen dentro de cada intervalo. Elegimos un color verde claro para las barras y decidimos dividir los datos en 10 intervalos, para que la distribución sea más fácil de ver.
+
+Luego, generamos un `boxplot()`, que nos da una visión más detallada de la dispersión de los datos y los posibles valores atípicos. En este gráfico, la caja muestra el rango intercuartílico (el 50% central de los datos), las líneas indican los valores máximos y mínimos, y cualquier punto fuera de esas líneas se considera un valor atípico. Usamos un color naranja para las cajas y dejamos el gráfico en su orientación vertical por defecto.
+
+## III.2 Análisis de interacción
+
+### III.2.1 Análisis de velocidad de subida por espacio
+
+```{r}
+ggplot(DF_limpio, aes(x = espacio, y = upload, fill = espacio)) +
+  geom_boxplot() +
+  labs(title = "Velocidad de subida por espacio",
+       x = "Espacio", y = "Velocidad de subida (Mbps)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+resumen_upload <- DF_limpio %>%
+  group_by(espacio) %>%
+  summarise(
+    media = mean(upload, na.rm = TRUE),
+    sd = sd(upload, na.rm = TRUE),
+    min = min(upload, na.rm = TRUE),
+    max = max(upload, na.rm = TRUE),
+    rango = max - min,
+    cv = sd/media * 100
+  )
+
+print(resumen_upload)
+```
+
+En el gráfico se observa la distribución de la **velocidad de subida** en distintos tipos de espacios (laboratorio, aula, sala de estudio). El promedio de velocidad de subida en `Aula A` es de aproximadamente **18.88** mbps, con una dispersión de **19.2** mbps.
+
+En `Lab L`, la velocidad promedio es de **30.35** mbps, mientras que en `Lab M` es de **8.86** mbps.
+
+Se puede notar que el ambiente con la mayor variabilidad en la velocidad de subida es `Comedor/Café` presentando un rango de **1.83** a **73.09** Mbps.
+
+Además, se detectan algunos valores atípicos (outliers), pero no son significantes en el análisis ya que eliminamos la mayoría anteriormente.
+
+**Interpretación:**\
+La variabilidad en la velocidad de subida muestra que los ambientes `Lab M` y `Aula A` presentan las mayores fluctuaciones. Esto se evidencia en sus elevados coeficientes de variación (CV), que alcanzan valores de **157.7 %** y **101.68 %**, respectivamente.
+
+En `Ascensor`, el CV del **55.24 %** indica una dispersión considerable respecto al promedio, sugiriendo una conexión poco consistente.
+
+En `Of.Atención`, el CV de **40.36 %** revela que, aunque el promedio es más bajo, la variabilidad relativa sigue siendo significativa.
+
+En contraste, el ambiente `Sala SUM` presenta un CV de solo **3.34 %**, lo que indica una conexión más estable y uniforme en ese espacio.
+
+### III.2.2 Análisis de la interacción entre el piso y el turno en relación con su velocidad de subida
+
+```{r}
+ggplot(DF_limpio, aes(x = piso, y = upload, fill = turno)) +
+  geom_boxplot() +
+  facet_wrap(~ turno) +
+  labs(title = "Interacción entre piso y Turno sobre velocidad de subida",
+       x = "Piso", y = "Velocidad de subida (Mbps)") +
+  theme_minimal()
+```
+
+Este gráfico muestra cómo varía la velocidad de subida según el piso y el turno. Se utiliza un `facet_wrap()` para separar los turnos, permitiendo observar patrones específicos por horario. En general, se observan mayores velocidades en pisos superiores durante turnos menos congestionados .
+
+Creamos un gráfico de caja (`boxplot`) para mostrar cómo la velocidad de subida (`upload`) varía según el piso (`piso`) y cómo se comporta esta relación dependiendo del turno (`turno`).
+
+Primero, usamos `ggplot()` para crear el gráfico, donde le indicamos a `ggplot` que la variable `piso` esté en el eje X y la variable `upload` (velocidad de subida) esté en el eje Y. También le decimos que el color de las cajas debe depender del `turno`, es decir, que cada turno tenga un color diferente.
+
+Luego, con `geom_boxplot()`, generamos el gráfico de caja, que nos permite ver la distribución de los datos de velocidad de subida por cada piso. Además, usamos `facet_wrap(~ turno)` para crear un panel separado por cada turno, lo que nos da una comparación visual entre los distintos turnos.
+
+El título del gráfico se establece con `labs(title = "Interacción entre piso y Turno sobre velocidad de subida")`, y también etiquetamos los ejes X y Y para que quede claro qué representa cada uno: "`Piso`" y "`Velocidad de subida (Mbps)`".
+
+Finalmente, usamos `theme_minimal()` para darle un estilo más limpio y sencillo al gráfico, eliminando elementos innecesarios y dejando el foco en los datos.
+
+### III.2.3 Heatmap
+
+```{r}
+tabla_heat <- DF_limpio %>%
+  group_by(turno, dispositivo) %>%
+  summarise(prom_upload = mean(upload, na.rm = TRUE)) %>%
+  ungroup()
+
+ggplot(tabla_heat, aes(x = dispositivo, y = turno, fill = prom_upload)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightyellow", high = "red", na.value = "grey90") +
+  labs(title = "Heatmap de velocidad promedio de subida (upload)",
+       x = "Dispositivo", y = "Turno", fill = "Mbps") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1))
+```
+
+En este bloque de código, estamos creando un **heatmap** (mapa de calor) para visualizar la velocidad promedio de subida (`upload`) en función del dispositivo y el turno, lo cual nos permite identificar patrones en los datos de forma clara.
+
+Primero, calculamos la tabla de datos que vamos a usar para el gráfico. Usamos `group_by(turno, dispositivo)` para agrupar los datos por turno y dispositivo, y luego calculamos la media de la velocidad de subida (`prom_upload`) para cada combinación de turno y dispositivo con `summarise()`. También usamos `na.rm = TRUE` para asegurarnos de que los valores faltantes (`NA`) no interfieran en los cálculos. Después de realizar el resumen, usamos `ungroup()` para desagrupar los datos.
+
+Luego, con `ggplot()`, creamos el gráfico. En este caso, el eje X representa los dispositivos, el eje Y representa los turnos y el color de cada celda depende de la velocidad promedio de subida (`prom_upload`). Usamos `geom_tile()` para generar las celdas del mapa de calor, y `color = "white"` agrega un borde blanco entre cada celda para hacer que los límites sean más visibles.
+
+El color de las celdas está determinado por la escala `scale_fill_gradient()`, donde asignamos colores de un gradiente que va de un amarillo claro ("`lightyellow`") a un rojo intenso ("`red`"). Los valores `NA` se asignan a un color gris claro ("`grey90`") para diferenciarlos.
+
+Con `labs()`, le damos un título al gráfico ("Heatmap de velocidad promedio de subida (upload)") y etiquetamos los ejes X y Y. Además, añadimos la leyenda del color que muestra que representa la velocidad en Mbps.
+
+Usamos `theme_minimal()` para un diseño limpio y sencillo, y `theme(axis.text.x = element_text(angle = 45, hjust = 1))` para rotar las etiquetas del eje X 45 grados, de modo que sean más fáciles de leer si los nombres de los dispositivos son largos.
+
+**Identificación de patrones:**
+
+Los turnos de **mañana y tarde** presentan velocidades de subida más altas (color rojo) en dispositivos como **laptop y computadora**. En contraste, los turnos de **noche** muestran tonos más claros (amarillo), especialmente en **celulares**, lo que indica una disminución general en la velocidad de subida durante ese turno.
+
+**Dispositivos con mejor rendimiento:**
+
+Las **laptops** registran velocidades consistentemente más altas en todos los turnos, lo que podría estar relacionado con su capacidad de conexión más robusta. Los **celulares** presentan velocidades más bajas en general, especialmente en los turnos de noche, lo que podría indicar congestión de red o limitaciones de conexión.
+
+**Anomalías y espacios sin datos:**
+
+Se observan varios espacios en `Grey90`, lo que sugiere **ausencia de datos** para ciertos dispositivos y turnos, limitando la capacidad de análisis en esas combinaciones.
+
+# IV. Conclusiones
+
+A partir del análisis estadístico de las variables relacionadas con la conexión a internet en distintos ambientes de la UTEC durante el periodo académico 2025-1, se puede concluir lo siguiente:
+
+**Variabilidad de la conexión según el ambiente:**\
+Los resultados muestran diferencias significativas en la velocidad de subida, bajada y latencia entre los distintos tipos de ambientes (Aulas, Laboratorios, Espacios Comunes). Los espacios comunes presentan la mayor variabilidad, reflejando fluctuaciones en la estabilidad de la conexión, posiblemente debido a una mayor densidad de usuarios y limitaciones en la infraestructura de red.
+
+**Condiciones óptimas de conexión:**\
+A partir del análisis de interacción entre `piso`, `turno` y `espacio`, se identificaron los puntos críticos y horarios óptimos donde se alcanzan las mejores condiciones de conexión. Los laboratorios en los pisos superiores mostraron los mejores desempeños durante turnos de menor afluencia, mientras que los espacios comunes en los pisos inferiores presentaron los mayores problemas de latencia en horas pico.
+
+```{r}
+View(DF)
+```
